@@ -3,6 +3,8 @@
 Detector and proof-of-concept LPE for the Linux `algif_aead` /
 `authencesn` page-cache scratch-write bug disclosed 2026-04-29.
 
+Disclosure writeup: <https://xint.io/blog/copy-fail-linux-distributions>
+
 ## Authorization
 
 Use only on hosts you own or are explicitly engaged to assess. The LPE
@@ -167,3 +169,8 @@ not met` and exit 0.
 
 The upstream fix reverts in-place AEAD operations to out-of-place,
 keeping page-cache pages out of writable scatterlists.
+
+## References
+
+- Xint disclosure writeup: <https://xint.io/blog/copy-fail-linux-distributions>
+- CVE-2026-31431
