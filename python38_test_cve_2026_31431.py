@@ -22,6 +22,32 @@ import sys
 import tempfile
 from typing import Optional, Tuple
 
+# --- Mulai Patch os.splice untuk Python < 3.10 ---
+if not hasattr(os, 'splice'):
+    import ctypes
+    import ctypes.util
+    libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
+    
+    # Setup argumen C untuk fungsi splice
+    libc.splice.argtypes = [
+        ctypes.c_int, ctypes.POINTER(ctypes.c_longlong),
+        ctypes.c_int, ctypes.POINTER(ctypes.c_longlong),
+        ctypes.c_size_t, ctypes.c_uint
+    ]
+    libc.splice.restype = ctypes.c_ssize_t
+
+    def fallback_splice(src, dst, count, offset_src=None, offset_dst=None, flags=0):
+        p_src = ctypes.byref(ctypes.c_longlong(offset_src)) if offset_src is not None else None
+        p_dst = ctypes.byref(ctypes.c_longlong(offset_dst)) if offset_dst is not None else None
+        res = libc.splice(src, p_src, dst, p_dst, count, flags)
+        if res < 0:
+            err = ctypes.get_errno()
+            raise OSError(err, os.strerror(err))
+        return res
+        
+    os.splice = fallback_splice
+# --- Akhir Patch ---
+
 AF_ALG                    = 38
 SOL_ALG                   = 279
 ALG_SET_KEY               = 1
